@@ -32,6 +32,25 @@
     return x
   }
 
+  var maxhigh = function(arr, bools){
+    var x = 0
+    var tempMax = 0
+    for (var i = 0; i < arr.length; i++) {
+      if(bools[i] == false){
+        continue
+      }
+      if(i == arr.length){
+        tempMax = arr[i]*(bools[i] ? 1 : 0)
+      }
+      x = arr[i]*(bools[i] ? 1 : 0)
+      if(tempMax >x){
+        x = tempMax
+      }
+    }
+    return x
+  }
+
+
   var Integrators = {
     Euler    : [[1]],
     Midpoint : [[.5,.5],[0, 1]],
@@ -60,7 +79,8 @@
 
   $: logN              = Math.log(7e6)
   $: N                 = Math.exp(logN)
-  $: InterventionTime  = 100  
+  $: InterventionTime  = 50  
+  $: dt                = 1
   //customize factor
   $: Time_to_death     = 32
   $: I0                = 1
@@ -76,7 +96,6 @@
   $: InterventionAmt   = 1 - OMInterventionAmt
   $: Time              = 220
   $: Xmax              = 110000
-  $: dt                = 2
   $: P_SEVERE          = 0.2
   $: duration          = 7*12*1e10
 
@@ -91,7 +110,7 @@
 
 var UK={
     //UK day_70           1    2   3
-    Infectious  : [[2],	[2],	[2],	[2],	[2],	[2],	[3],	[3],	[3],	[4],	[8],	[8],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[13],	[13],	[13],	[13],	[16],	[20],	[23],	[36],	[39],	[51],	[89],	[118],	[167],	[210],	[277],	[323],	[373],	[460],	[594],	[802],	[1144],	[1395],	[1547],	[1954],	[2630],	[3277],	[3983],	[5018],	[5018],	[5687],	[6654],	[8081],	[9533],	[11662],	[14547],	[17093],	[19526],	[22145],	[25154],	[29478],	[33722],	[38172],	[41907],	[47810],	[51612],	[55246],	[60737],	[65081],	[70276],	[78995],	[84283],	[88625],	[93877],	[98480],	[103097],	[108696]],
+    Infectious  : [[0],[2],	[2],	[2],	[2],	[2],	[2],	[3],	[3],	[3],	[4],	[8],	[8],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[9],	[13],	[13],	[13],	[13],	[16],	[20],	[23],	[36],	[39],	[51],	[89],	[118],	[167],	[210],	[277],	[323],	[373],	[460],	[594],	[802],	[1144],	[1395],	[1547],	[1954],	[2630],	[3277],	[3983],	[5018],	[5687],	[6654],	[8081],	[9533],	[11662],	[14547],	[17093],	[19526],	[22145],	[25154],	[29478],	[33722],	[38172],	[41907],	[47810],	[51612],	[55246],	[60737],	[60737]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -99,7 +118,7 @@ var UK={
 
 var Germany={
     //Germany day_73           1    2   3
-    Infectious  : [[4],	[4],	[4],	[7],	[8],	[10],	[10],	[12],	[12],	[13],	[14],	[14],	[14],	[14],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[18],	[21],	[26],	[57],	[57],	[129],	[158],	[196],	[262],	[400],	[639],	[795],	[902],	[1139],	[1296],	[1567],	[1567],	[2260],	[3795],	[4838],	[6012],	[7156],	[8198],	[10999],	[18323],	[21463],	[21463],	[24774],	[29212],	[31554],	[36508],	[42288],	[48582],	[52547],	[57298],	[61913],	[67366],	[73522],	[79696],	[85778],	[91714],	[95391],	[99225],	[103228],	[108202],	[113525],	[117658],	[120479],	[123016],	[125098],	[127584],	[130450],	[133830],	[137439]],
+    Infectious  : [[0],[4],	[4],	[4],	[7],	[8],	[10],	[12],	[12],	[12],	[13],	[14],	[14],	[14],	[14],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[16],	[18],	[21],	[26],	[57],	[57],	[129],	[158],	[196],	[262],	[534],	[639],	[795],	[1112],	[1139],	[1296],	[1567],	[1567],	[3062],	[3795],	[4838],	[6012],	[7156],	[8198],	[10999],	[18323],	[21463],	[24774],	[29212],	[31554],	[36508],	[42288],	[48582],	[52547],	[57298],	[61913],	[67366],	[73522],	[79696],	[85778],	[91714],	[95391],	[99225],	[103228],	[108202],	[108202]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -107,7 +126,7 @@ var Germany={
 
 var France={
     //France day_77           1    2   3
-    Infectious  : [[3],	[3],	[3],	[3],	[4],	[4],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[11],	[11],	[11],	[11],	[11],	[11],	[11],	[11],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[18],	[18],	[57],	[100],	[100],	[188],	[209],	[282],	[420],	[613],	[706],	[1116],	[1402],	[1774],	[2269],	[2281],	[3640],	[4469],	[5380],	[6573],	[7652],	[9043],	[10877],	[12475],	[14296],	[14296],	[15821],	[19615],	[22025],	[24920],	[28786],	[32542],	[37145],	[39642],	[43977],	[51477],	[56261],	[58327],	[63536],	[67757],	[69607],	[73488],	[77226],	[81095],	[85351],	[89683],	[92787],	[94382],	[97050],	[102533],	[105155],	[107778],	[108163]],
+    Infectious  : [[0],[3],	[3],	[3],	[3],	[4],	[4],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[6],	[11],	[11],	[11],	[11],	[11],	[11],	[11],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[12],	[18],	[38],	[57],	[100],	[100],	[188],	[209],	[282],	[420],	[613],	[706],	[1116],	[1402],	[1774],	[2269],	[2860],	[3640],	[4469],	[5380],	[6573],	[7652],	[9043],	[10877],	[12475],	[14296],	[15821],	[19615],	[22025],	[24920],	[28786],	[32542],	[37145],	[39642],	[43977],	[51477],	[56261],	[58327],	[63536],	[67757],	[69607],	[73488],	[77226],	[81095],	[81095]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -115,7 +134,7 @@ var France={
 
 var Spain={
     //Spain day_70           1    2   3
-    Infectious  : [[1],	[1],	[1],	[1],	[1],	[1],	[1],	[1],	[1],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[12],	[25],	[32],	[45],	[45],	[114],	[151],	[198],	[257],	[374],	[430],	[589],	[1024],	[1639],	[2140],	[2965],	[4231],	[5753],	[7753],	[9191],	[11178],	[13716],	[17147],	[19980],	[24926],	[24926],	[28572],	[33089],	[39673],	[47610],	[56188],	[64059],	[72248],	[78797],	[85195],	[94417],	[102136],	[110238],	[117710],	[124736],	[130759],	[135032],	[140510],	[146690],	[152446],	[157022],	[161852],	[166019],	[169496],	[172541],	[177633],	[182816],	[188068]],
+    Infectious  : [[0],[1],	[1],	[1],	[1],	[1],	[1],	[1],	[1],	[1],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[2],	[12],	[25],	[32],	[45],	[45],	[114],	[151],	[198],	[257],	[374],	[430],	[589],	[1024],	[1639],	[2140],	[2965],	[4231],	[5753],	[7753],	[9191],	[11178],	[13716],	[17147],	[19980],	[24926],	[28572],	[33089],	[39673],	[47610],	[56188],	[64059],	[72248],	[78797],	[85195],	[94417],	[102136],	[110238],	[117710],	[124736],	[130759],	[135032],	[140510],	[146690],	[146690]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -123,7 +142,7 @@ var Spain={
 
 var US={
     //US day_81           1    2   3
-    Infectious  : [[1],	[1],	[1],	[1],	[2],	[2],	[5],	[5],	[5],	[5],	[6],	[7],	[8],	[8],	[11],	[11],	[11],	[12],	[12],	[12],	[12],	[12],	[13],	[13],	[15],	[15],	[15],	[15],	[15],	[15],	[15],	[15],	[34],	[35],	[35],	[53],	[53],	[59],	[59],	[62],	[62],	[62],	[64],	[108],	[129],	[148],	[213],	[213],	[213],	[472],	[696],	[696],	[987],	[1264],	[1678],	[1714],	[1714],	[3536],	[7087],	[10442],	[15219],	[15219],	[15219],	[31573],	[51914],	[51914],	[68334],	[68334],	[85228],	[103321],	[122653],	[140640],	[163199],	[187302],	[213600],	[241703],	[273808],	[307318],	[333811],	[363321],	[395030],	[425889],	[461275],	[492881],	[524514],	[553822],	[578268],	[604070],	[632781],	[665330]],
+    Infectious  : [[0],[1],	[1],	[1],	[2],	[2],	[3],	[3],	[3],	[6],	[6],	[17],	[17],	[17],	[17],	[17],	[17],	[22],	[30],	[30],	[30],	[33],	[37],	[40],	[42],	[43],	[43],	[45],	[45],	[1],	[1],	[1],	[1],	[2],	[2],	[5],	[5],	[5],	[5],	[6],	[7],	[8],	[11],	[11],	[11],	[12],	[12],	[12],	[12],	[12],	[13],	[13],	[14],	[15],	[15],	[15],	[15],	[15],	[15],	[15],	[15],	[35],	[35],	[35],	[53],	[53],	[59],	[59],	[62],	[62],	[62],	[64],	[108],	[129],	[148],	[213],	[213],	[213],	[472],	[696],	[987],	[1264],	[1678],	[1678],	[1714],	[3536],	[4356],	[7087],	[10442],	[15219],	[15219],	[31573],	[42164],	[51914],	[63570],	[68334],	[85228],	[103321],	[122653],	[140640],	[163199],	[187302],	[213600],	[241703],	[273808],	[307318],	[333811],	[363321],	[395030],	[395030]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -131,7 +150,7 @@ var US={
 
 var China={
     //China day_91           1    2   3
-    Infectious  : [[41],	[41],	[41],	[41],	[41],	[41],	[45],	[62],	[121],	[198],	[291],	[443],	[574],	[835],	[1297],	[1985],	[2761],	[4533],	[5995],	[7736],	[9720],	[11821],	[14411],	[17238],	[20471],	[24363],	[28060],	[31211],	[34598],	[37251],	[40236],	[42708],	[44730],	[59882],	[63932],	[66576],	[68584],	[70635],	[72528],	[74279],	[74675],	[75567],	[76392],	[77041],	[77262],	[77779],	[78190],	[78630],	[78959],	[79389],	[79968],	[80174],	[80302],	[80422],	[80565],	[80711],	[80813],	[80859],	[80904],	[80924],	[80955],	[80981],	[80991],	[81021],	[81048],	[81077],	[81116],	[81174],	[81300],	[81416],	[81498],	[81499],	[81603],	[81767],	[81869],	[81961],	[82093],	[82213],	[82341],	[82455],	[82545],	[82638],	[82724],	[82802],	[82875],	[82930],	[83005],	[83071],	[83161],	[83249],	[83305],	[83383],	[83485],	[83597],	[83696],	[83747],	[83797],	[84149],	[84180]],
+    Infectious  : [[0],[41], [41],	[41],	[41],	[41],	[41],	[45],	[62],	[121],	[198],	[291],	[443],	[574],	[835],	[1297],	[1985],	[2761],	[4533],	[5995],	[7736],	[9720],	[11821],	[14411],	[17238],	[20471],	[24363],	[28060],	[31211],	[34598],	[37251],	[40236],	[42708],	[44730],	[59882],	[63932],	[66576],	[68584],	[70635],	[72528],	[74279],	[74675],	[75567],	[76392],	[77041],	[77262],	[77779],	[78190],	[78630],	[78959],	[79389],	[79968],	[80174],	[80302],	[80422],	[80565],	[80711],	[80813],	[80859],	[80904],	[80924],	[80955],	[80981],	[80991],	[81021],	[81048],	[81077],	[81116],	[81151],	[81262],	[81300],	[81416],	[81498],	[81601],	[81747],	[81848],	[81961],	[82078],	[82213],	[82341],	[82447],	[82544],	[82631],	[82724],	[82802],	[82875],	[82930],	[83005],	[83071],	[83157],	[83249],	[83249]],
     Recovered   : [[0],[0],[1]],
     Fatalities  : [[2]]
   }
@@ -153,16 +172,19 @@ var China={
 // dt, N, I0, R0, D_incbation, D_infectious, D_recovery_mild, D_hospital_lag, D_recovery_severe, D_death, P_SEVERE, CFR, InterventionTime, InterventionAmt, duration
 
   function get_solution(dt, N, I0, R0, D_incbation, D_infectious, D_recovery_mild, D_hospital_lag, D_recovery_severe, D_death, P_SEVERE, CFR, InterventionTime, InterventionAmt, duration) {
-
-    var interpolation_steps = 40
-
-
-
-    var max_step = 110
-
+/*
+    var interpolation_steps = 20
+    var max_step = 200
     var steps = count*interpolation_steps
     var dt = dt/interpolation_steps
     var sample_step = interpolation_steps
+*/
+    var interpolation_steps = 40
+    var steps = 110*interpolation_steps
+    var dt = dt/interpolation_steps
+    var sample_step = interpolation_steps
+
+    console.log (steps , ':' , dt ,': ' , sample_step)
 //分類法
     var method = Integrators["RK4"]
     function f(t, x){
@@ -215,27 +237,18 @@ var China={
     var TI = []
     var Iters = []
     
-    var tw_day = tw_real_data['Infectious'].length -2
-    var uk_day = UK['Infectious'].length -2
-    var gm_day = Germany['Infectious'].length -2
-    var fr_day = France['Infectious'].length -2
-    var sp_day = Spain['Infectious'].length -2
-    var us_day = US['Infectious'].length -2
-    var cn_day = China['Infectious'].length -2
+    var tw_day = tw_real_data['Infectious'].length -1
+    var uk_day = UK['Infectious'].length -1
+    var gm_day = Germany['Infectious'].length -1
+    var fr_day = France['Infectious'].length -1
+    var sp_day = Spain['Infectious'].length -1
+    var us_day = US['Infectious'].length -1
+    var cn_day = China['Infectious'].length -1
     
-   /*
-    var uk_day = UK['Infectious'].length -2
-    var gm_day = 20
-    var fr_day = 20
-    var sp_day = 30
-    var us_day = 20
-    var cn_day = 10
-    //testing
-    console.log(tw_day, uk_day, gm_day)
-    */
+    var test = 0
     while (steps--) { 
       if ((steps+1) % (sample_step) == 0) {
-
+        
         
         var dy = count-(steps+1)/(sample_step)
 
@@ -268,16 +281,18 @@ var China={
           cn_count=0
         }                            
           //    Dead   Hospital       Recovered        Infectious   Exposed    Taiwan ,China['Infectious'][dy]
+      
         P.push([ N*v[9], N*(v[5]+v[6]),  N*(v[7] + v[8]), N*v[2],    N*v[1] ,
-        tw_real_data['Infectious'][tw_count] 
-        ,UK['Infectious'][uk_count] 
-        ,Germany['Infectious'][gm_count] 
+         1*tw_real_data['Infectious'][tw_count] 
+        ,1*UK['Infectious'][uk_count] 
+        ,1*Germany['Infectious'][gm_count] 
         ,France['Infectious'][fr_count]
         ,US['Infectious'][us_count]
         ,Spain['Infectious'][sp_count]
         ,China['Infectious'][cn_count]
         ])
-        // tw_real_data['Infectious'][0]
+  
+
         Iters.push(v)
         TI.push(N*(1-v[0]))
         // console.log((v[0] + v[1] + v[2] + v[3] + v[4] + v[5] + v[6] + v[7] + v[8] + v[9]))
@@ -286,6 +301,8 @@ var China={
       v =integrate(method,f,v,t,dt); 
       t+=dt
     }
+    //console.log(P.length)
+
     return {"P": P, 
             "deaths": N*v[6], 
             "total": 1-v[0],
@@ -296,13 +313,25 @@ var China={
 
 
   function max(P, checked) {
-    return P.reduce((max, b) => Math.max(max, sum(b, checked) ), sum(P[0], checked) )
+    
+    var total3 = P.reduce((pre,cur ,index, P) => {
+      return Math.max(  pre, maxhigh(cur, checked) ) > maxhigh(P[0], checked)  ? Math.max(  pre, maxhigh(cur, checked) ) : maxhigh(P[0], checked)
+    }
+    )
+    //console.log('total3 :', total3)
+    if(total3 > tatoltest){
+      tatoltest = total3
+    }
+    return tatoltest
   }
-  $: count = 100  //days of 
+
+  $: tatoltest      = 0
+
+  $: count = 110  //days of 
   $: Sol            = get_solution(dt, N, I0, R0, D_incbation, D_infectious, D_recovery_mild, D_hospital_lag, D_recovery_severe, D_death, P_SEVERE, CFR, InterventionTime, InterventionAmt, duration)
   $: P              = Sol["P"].slice(0,100)
-  $: timestep       = dt
-  $: tmax           = 200
+  $: timestep       = 1
+  $: tmax           = dt * 100
   $: deaths         = Sol["deaths"]
   $: total          = Sol["total"]
   $: total_infected = Sol["total_infected"].slice(0,100)
@@ -312,7 +341,7 @@ var China={
   $: lock           = false
 
   var colors = [ "#386cb0", "#8da0cb", "#4daf4a", "#f0027f", "#fdc086","#336666","#0000C6","#2F0000","#66B3FF","#F75000","#FF7575","#FFD306"]
-
+      
   var Plock = 1
 
   var drag_y = function (){
@@ -494,7 +523,7 @@ var China={
   $: get_d = function(i){
     return dIters(indexToTime(i), Iters[i])
   }
-
+////// function milestone 
   function get_milestones(P){
 
     function argmax(x, index) {
@@ -719,7 +748,7 @@ var China={
 
 </style>
 
-<h2>Taiwan Epidemic Calculator</h2>
+<h2>COVID-19 Epidemic Calculator</h2>
 
 <div class="chart" style="display: flex; max-width: 1120px">
 
@@ -1073,7 +1102,7 @@ var China={
 
 <!-- country UK-->
     <div class="column">
-    <div style="position:relative; left:-20px; top:20px; width: 150px; height: 100px">
+    <div style="position:relative; left:20px; top:20px; width: 300px; height: 200px">
         <div class="legendtitle">The United Kingdom</div>
         <div class="legend" style="position:relative;">
         <Checkbox color="{colors[6]}" bind:checked={checked[6]}/>
@@ -1137,7 +1166,7 @@ var China={
 
 <div style="height:150px;">
   <div class="minorTitle">
-    <div style="margin: 0px 4px 5px 0px" class="minorTitleColumn">Vaccination expenditure/GDP </div>
+    <div style="margin: 0px 4px 5px 0px" class="minorTitleColumn">Healthcare Expenditure/GDP </div>
   </div>
 </div>
 
@@ -1218,7 +1247,9 @@ var China={
 
 <p class = "center">
 
-At the time of writing, the coronavirus disease of 2019 remains a global health crisis of grave and uncertain magnitude. To the non-expert (such as myself), contextualizing the numbers, forecasts and epidemiological parameters described in the media and literature can be challenging. I created this calculator as an attempt to address this gap in understanding.
+The <a href="https://twitter.com/gabeeegoooh">orginate</a> with the model. With the combination of the real confrimed numbers and the simulate factors, hoping may help with the forceasts.
+The confirmed number last updated 18th April, data source from WHO. As the non-expert (both coding and epidemiology), very welcome any feedback through <a href="mailto:bearwahaha@gmail.com">email</a>.
+
 </p>
 
 <p class = "center">
@@ -1334,8 +1365,6 @@ See [<a href="https://academic.oup.com/jtm/advance-article/doi/10.1093/jtm/taaa0
 </p>
 
 <p class="center">
-Please DM me feedback <a href="https://twitter.com/gabeeegoooh">here</a> or email me <a href="mailto:izmegabe@gmail.com">here</a>. My <a href="http://gabgoh.github.io/">website</a>.
-</p>
 
 <!-- 
 <p class="center">
@@ -1350,7 +1379,7 @@ The clinical dynamics in this model are an elaboration on SEIR that simulates th
 
 <p class = "center">
 <b> Acknowledgements </b><br>
-<a href = "https://enkimute.github.io/">Steven De Keninck</a> for RK4 Integrator. <a href="https://twitter.com/ch402">Chris Olah</a>, <a href="https://twitter.com/shancarter">Shan Carter
+<a href="https://twitter.com/gabeeegoooh">Orginator</a>. <a href = "https://enkimute.github.io/">Steven De Keninck</a> for RK4 Integrator. <a href="https://twitter.com/ch402">Chris Olah</a>, <a href="https://twitter.com/shancarter">Shan Carter
 </a> and <a href="https://twitter.com/ludwigschubert">Ludwig Schubert
 </a> wonderful feedback. <a href="https://twitter.com/NikitaJer">Nikita Jerschov</a> for improving clarity of text. Charie Huang for context and discussion.
 </p>

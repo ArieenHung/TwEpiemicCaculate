@@ -27,6 +27,25 @@
     return x
   }
 
+  var maxhigh = function(arr, bools){
+    var x = 0
+    var tempMax = 0
+    for (var i = 0; i < arr.length; i++) {
+      if(bools[i] == false){
+        continue
+      }
+      if(i == arr.length){
+        tempMax = arr[i]*(bools[i] ? 1 : 0)
+      }
+      x = arr[i]*(bools[i] ? 1 : 0)
+      if(tempMax >x){
+        x = tempMax
+      }
+    }
+    return x
+  }
+
+
   export let y;
   export let tmax;
   export let xmax; 
@@ -73,9 +92,12 @@
 
   $: innerWidth = width - (padding.left + padding.right);
   $: barWidth = innerWidth / y.length - 1.5;
+
+
   $: active_hover = -1
   $: lock = false
   var active_lock = 0
+
 
   $: active = (function () {
     if (lock){
@@ -93,7 +115,8 @@
   export let active;
   export let checked;
 
-  // var data = [[2   , 2  ], [5   , 2  ], [18  , 4  ], [28  , 6  ], [43  , 8  ], [61  , 12 ], [95  , 16 ], [139 , 19 ], [245 , 26 ], [388 , 34 ], [593 , 43 ], [978 , 54 ], [1501, 66 ], [2336, 77 ], [2922, 92 ], [3513, 107], [4747, 124]]
+  //var data = [[2  , 100 ], [5   , 2  ], [18  , 4  ], [28  , 6  ], [43  , 8  ], [61  , 12 ], [95  , 16 ], [139 , 19 ], [245 , 26 ], [388 , 34 ], [593 , 43 ], [978 , 54 ], [1501, 66 ], [2336, 77 ], [2922, 92 ], [3513, 107], [4747, 124]]
+  
   var data = []
 </script>
 
@@ -143,7 +166,7 @@
   .intervention line {
     stroke: #555;
     stroke-dasharray: 0;
-    stroke-width:12.5;
+    stroke-width:2.5;
   }
 
 
@@ -186,7 +209,7 @@
 
     <!-- y axis -->
     <g class="axis y-axis" transform="translate(0,{padding.top})">
-      {#each yScale.ticks(5) as tick}
+      {#each yScale.ticks(6) as tick}
         <g class="tick tick-{tick}" transform="translate(0, {yScale(tick) - padding.bottom})">
           <line x2="100%"></line>
           <text y="-4">{Number.isInteger(Math.log10(tick)) ? formatNumber(tick) : (log ? "": formatNumber(tick))}{ (tick == yScale.ticks(5)[0]) ? " ": ""}</text>
@@ -202,9 +225,10 @@
         </g>
       {/each}
     </g>
-
+    <!-- 空白處的填白 -->
     <g class='bars'>
       {#each range(y.length) as i}
+
         <rect
           on:mouseover={() => showTip(i)}
           on:mouseout={() => showTip(-1)}
@@ -220,14 +244,17 @@
         {#each range(colors.length) as j}
           {#if !log}
               <rect
+
                 on:mouseover={() => showTip(i)}
                 on:mouseout={() => showTip(-1)}
                 on:click={() => {lock = !lock; active_lock = indexToTime(i) }}
                 class="bar"
                 x="{xScale(i) + 2}"
-                y="{yScale( sum(y[i].slice(0,j+1), checked) )}"
+                y="{yScale( maxhigh(y[i].slice(0,j+1), checked) )}"
                 width="{barWidth}"
-                height="{Math.max(height - padding.bottom - yScale(y[i][j]*checked[j] ),0)}" 
+                height="{height - padding.bottom - yScale(y[i][j]*checked[j] )}" 
+                                     
+
                 style="fill:{colors[j]};
                        opacity:{active == i ? 0.9: 0.6}">     
               </rect>
@@ -266,6 +293,7 @@
 
     <g class='bars'>
       {#each range(data.length) as i}
+
         <rect
           class="bar"
           x="{xScale( i+28 ) + 2}"
@@ -289,7 +317,9 @@
                   width:100px;
                   left:{xScale(active)}px;
                   top:{Math.max(yScale(sum(y[active], checked)),0) }px" class="tip"> 
-          <!-- {#if lock} <div style="position:absolute; top:-35px; left:-3.5px; font-family: Source Code Pro">🔒</div> {/if} -->
+
+           {#if lock} <div style="position:absolute; top:-35px; left:-3.5px; font-family: Source Code Pro">🔒</div> {/if} 
+
           <svg style="position:absolute; top:-12px; left:0px" height="10" width="10">
           <path 
             d="M 0 0 L 10 0 L 5 10 z"
